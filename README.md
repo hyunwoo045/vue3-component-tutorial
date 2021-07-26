@@ -334,3 +334,61 @@ export default {
   };
 </script>
 ```
+
+<br/><br/>
+
+## Slot
+
+앞 서, slot 태그를 사용해 보았다. slot 태그의 위치에는 컴포넌트 태그 사이에 작성된 내용이 대체되어 렌더링 된다.
+<br/>
+slot 태그 사이의 내용은 컴포넌트 태그 사이의 내용이 없을 때에 출력된다. 이를 보고 `Fallback contents` 라고 한다.
+
+<br/>
+
+### - 슬롯을 이용한 요소의 순서 보장
+
+```html
+<template>
+  <MyBtn>
+    <span>(A)</span>
+    <span>(B)</span>
+  </MyBtn>
+</template>
+```
+
+```html
+<template>
+  <div>
+    <slot></slot>
+  </div>
+</template>
+```
+
+- 위 코드가 실행되면 (A)(B) 가 순서대로 출력된다.
+- 만약 span 태그의 위치가 서로 바뀐다면 (B)(A) 가 출력될 것이다.
+- 이 때 항상 (A)(B) 순서대로 출력됨을 보장해야 한다고 가정했을 때의 코드를 작성해본다.
+
+```html
+<!-- # 기호는 v-slot 의 약어이며, 약어를 사용하는 것이 권장된다 -->
+<template>
+  <MyBtn>
+    <template #text>
+      <span>Banana</span>
+    </template>
+    <template #icon>
+      <span>(B)</span>
+    </template>
+  </MyBtn>
+</template>
+```
+
+```html
+<template>
+  <div class="btn">
+    <slot name="icon"></slot>
+    <slot name="text"></slot>
+  </div>
+</template>
+```
+
+- 컴포넌트 태그 내에서 text 부분을 먼저 작성했음에도 불구하고 icon 부분이 먼저 출력됨을 알 수 있다.
