@@ -2,15 +2,29 @@
   <div class="btn">
     <slot></slot>
   </div>
-  <h1 v-bind="$attrs"></h1>
+  <h1 @dblclick="$emit('click', $event)">
+    ABC
+  </h1>
+  <input
+    type="text"
+    v-model="msg" />
 </template>
 
 <script>
 export default {
-  inheritAttrs: false,
-  created() {
-    console.log(this.$attrs)
-  }
+  emits: [
+    'click', 'changeMsg'
+  ],
+  data() {
+    return {
+      msg: ''
+    }
+  },
+  watch: {
+    msg() {
+      this.$emit('changeMsg', this.msg);
+    }
+  },
 }
 </script>
 
