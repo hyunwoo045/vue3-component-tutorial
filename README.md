@@ -392,3 +392,255 @@ slot 태그 사이의 내용은 컴포넌트 태그 사이의 내용이 없을 �
 ```
 
 - 컴포넌트 태그 내에서 text 부분을 먼저 작성했음에도 불구하고 icon 부분이 먼저 출력됨을 알 수 있다.
+
+<br/><br/>
+
+## Provide 와 Inject
+
+App -> Parent -> Child 순으로 연결되어 있는 구조의 코드가 있다고 가정해본다.
+
+이 때, App 에서 사용되는 data 를 Child 에서 사용하고 싶을 때, 아래와 같이 코드를 작성할 수 있었다.
+
+```html
+<!-- App -->
+<template>
+  <Parent :msg="message" />
+</template>
+
+<script>
+  import Parent from "~/components/Parent";
+  export default {
+    components: {
+      Parent,
+    },
+    data() {
+      return {
+        message: "Hello World!",
+      };
+    },
+  };
+</script>
+```
+
+```html
+<!-- Parent -->
+<template>
+  <Child :msg="msg" />
+</template>
+
+<script>
+  import Child from "~/components/Child";
+  export default {
+    components: {
+      Child,
+    },
+    props: {
+      msg: {
+        type: String,
+        default: "",
+      },
+    },
+  };
+</script>
+```
+
+```html
+<!-- Child -->
+<template>
+  <div>{{ msg }}</div>
+</template>
+
+<script>
+  export default {
+    props: {
+      msg: {
+        type: String,
+        default: "",
+      },
+    },
+  };
+</script>
+```
+
+- 이 때, Parent 컴포넌트 내부에서는 사용하지도 않는 msg 를 억지로 받아온 후 Child 컴포넌트의 속성으로 연결하는 불필요한 작업을 한다고 생각할 수 있다.
+- 이를 개선하고자 Provide, Inject 를 사용해본다.
+
+```html
+<!-- Vue -->
+<template>
+  <Parent />
+</template>
+
+<script>
+  import Parent from "~/components/Parent";
+  export default {
+    components: {
+      Parent,
+    },
+    data() {
+      return {
+        message: "Hello World!",
+      };
+    },
+    provide() {
+      return {
+        msg: this.message,
+      };
+    },
+  };
+</script>
+```
+
+- provide() 라고 하는 data와 매우 유사한 형태의 옵션을 작성한다.
+- msg 라고 하는 데이터를 this.message 로 연결한다.
+
+```html
+<!-- Parent -->
+<template>
+  <Child />
+</template>
+
+<script>
+  import Child from "~/components/Child";
+  export default {
+    components: {
+      Child,
+    },
+  };
+</script>
+```
+
+- Parent 컴포넌트에서는 더 이상 props 부분이 필요가 없어졌다.
+- Child 컴포넌트 태그에 속성을 모두 지우고, props 옵션도 모두 지웠다.
+
+```html
+<!-- Child -->
+<template>
+  <div>{{ msg }}</div>
+</template>
+
+<script>
+  export default {
+    inject: ["msg"],
+  };
+</script>
+```
+
+- Child 컴포넌트에서도 더 이상 props 옵션이 불필요해져 모두 삭제하였다.
+- inject 라고 하는 옵션을 선언하고 배열 형태로 value를 지정해준다. 그 안의 내용으로 App 에서 provide 한 msg 를 삽입하였다.
+- 이렇게 중간 컴포넌트를 거치지 않고도 msg 라고 하는 매개체가 잘 전달됨을 알 수 있다.
+
+### - 반응성 provide
+
+기본적으로 provide 로 만들어진 데이터는 반응성이 적용되지 않는다.
+
+아래 코드는 위 App.vue 코드를 버튼을 클릭했을 때 'Hello World!' 가 'Good?' 으로 변경되도록 변경한 코드이다.
+
+```html
+<template>
+  <button @click="message = 'Good?'">Click!</button>
+  <h1>App: {{ message }}</h1>
+  <Parent />
+</template>
+
+<script>
+  import Parent from "~/components/Parent";
+  export default {
+    components: {
+      Parent,
+    },
+    data() {
+      return {
+        message: "Hello World!",
+      };
+    },
+    provide() {
+      return {
+        msg: this.message,
+      };
+    },
+  };
+</script>
+```
+
+- 화면에 버튼이 나타나게 되고 버튼을 클릭하면 첫번째 줄의 "Hello World" 는 "Good?" 으로 변경되는 것을 볼 수 있다.
+- 하지만 Child 컴포넌트의 msg 는 변경되지 않았다.
+- provide 로 전달되는 데이터는 반응성을 제공하지 않기 때문이다.
+
+버튼을 클릭했을 때 Child 의 메세지도 변경되도록 수정해본다.
+
+```html
+<!-- App -->
+<template>
+  <button @click="message = 'Good?'">Click!</button>
+  <h1>App: {{ message }}</h1>
+  <Parent />
+</template>
+
+<script>
+  import Parent from "~/components/Parent";
+  import { computed } from "vue";
+
+  export default {
+    components: {
+      Parent,
+    },
+    data() {
+      return {
+        message: "Hello World!",
+      };
+    },
+    provide() {
+      return {
+        msg: computed(() => {
+          return this.message;
+        }),
+      };
+    },
+  };
+</script>
+```
+
+- App.vue 의 script 태그 내에 객체 구조 분해로 computed 를 import 받는다. ([참고 - computed](https://github.com/hyunwoo045/vue3-template-syntax))<br/>
+  vue 에서 computed 기능을 따로 가져오는 것이다.
+- 계산된 데이터를 반환하여 msg 에 들어가 동작함.
+
+```html
+<!-- Child -->
+<!-- 수정사항 없음 -->
+<template>
+  <div>Child: {{ msg }}</div>
+</template>
+
+<script>
+  export default {
+    inject: ["msg"],
+  };
+</script>
+```
+
+- 주의해야 할 점은 computed 로 계산된 내용을 그대로 출력하면 아래와 같은 결과를 볼 수 있다.
+
+  `Child: { "_dirty": false, "__v_isRef": true, "__v_isReadonly": true, "_value": "Good?" }`
+
+computed 로 계산된 객체임을 알 수 있음
+
+- 따라서 해당 객체의 value 값만 출력할 수 있도록 아래와 같이 수정해주자.
+
+```html
+<!-- Child -->
+<template>
+  <div>Child: {{ msg.value }}</div>
+</template>
+<!-- ... -->
+```
+
+<br/>
+
+### - provide, inject 정리
+
+- 부모-자식 간 데이터 통신을 위해서는 props 를 사용했다.
+- 조상-후손(부모-자식-자식) 간의 데이터 통신을 위해서는 중간에 부모 컴포넌트가 매개체로 필요하다.
+- 조상-후손 간 데이터 통신을 간편하게 하기 위해 Provide, Inject 옵션을 활용한다.
+- Provide, Inject 는 반응성을 제공하지 않는다.
+- 반응성이 필요하다면 computed 기능을 활용할 수 있다.
