@@ -149,4 +149,4 @@ template 태그의 바로 아래 요소를 `최상위 요소 (루트)` 라고 �
 </script>
 ```
 
-![result]("./markdown/vue.component.attr.png")
+![result]("https://raw.githubusercontent.com/hyunwoo045/vue3-component-tutorial/master/markdown/vue.component.attr.png")
