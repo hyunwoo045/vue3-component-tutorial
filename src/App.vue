@@ -1,5 +1,8 @@
 <template>
-  <MyBtn class="heropy">
+  <MyBtn
+    class="hwoo"
+    style="color: red;"
+    title="Hello World!">
     Banana
   </MyBtn>
 </template>

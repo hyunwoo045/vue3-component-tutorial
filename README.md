@@ -135,7 +135,8 @@ template 태그의 바로 아래 요소를 `최상위 요소 (루트)` 라고 �
 </script>
 ```
 
-- 컴포넌트가 생성될 때 연결된 속성값을 확인하는 법 (`$attr`)
+- 컴포넌트가 생성될 때 연결된 속성값을 확인하는 법 (`$attrs`)
+- class 명인 'hwoo' 가 target 에 명시 되어 있음을 알 수 있다.
 
 ```html
 <!-- components/MyBtn.vue -->
@@ -149,4 +150,30 @@ template 태그의 바로 아래 요소를 `최상위 요소 (루트)` 라고 �
 </script>
 ```
 
-![result](./markdown/vue.component.attr.png)
+![result](./markdown/attr.png)
+
+<br/>
+
+- v-bind 를 통해 attrs의 내용 모두를 요소에 적용 시킬 수도 있다. 이 때는 `:` 기호를 사용하지 않도록 한다.
+- h1 태그에 class 속성과 style 속성이 모두 연결 되어 있다.
+
+```html
+<!-- App.vue -->
+<template>
+  <MyBtn class="hwoo" style="color: red;">Banana</MyBtn>
+</template>
+
+<!-- ... -->
+```
+
+```html
+<!-- components/MyBtn.vue -->
+<template>
+  <div class="btn">
+    <slot></slot>
+  </div>
+  <h1 v-bind="$attrs"></h1>
+</template>
+```
+
+![v-bind:attrs](./markdown/inherit.attrs.png)
