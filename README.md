@@ -466,7 +466,7 @@ App -> Parent -> Child 순으로 연결되어 있는 구조의 코드가 있다�
 - 이를 개선하고자 Provide, Inject 를 사용해본다.
 
 ```html
-<!-- Vue -->
+<!-- App -->
 <template>
   <Parent />
 </template>
@@ -644,3 +644,123 @@ computed 로 계산된 객체임을 알 수 있음
 - 조상-후손 간 데이터 통신을 간편하게 하기 위해 Provide, Inject 옵션을 활용한다.
 - Provide, Inject 는 반응성을 제공하지 않는다.
 - 반응성이 필요하다면 computed 기능을 활용할 수 있다.
+
+<br/>
+
+## Refs.
+
+id='hello' 인 h1 태그의 textContent 를 출력하는 간단한 코드가 있다.
+
+```html
+<template>
+  <h1 id="hello">Hello World!</h1>
+</template>
+
+<script>
+  export default {
+    mounted() {
+      const h1E1 = document.querySelector("#hello");
+      console.log(h1E1.textContent);
+    },
+  };
+</script>
+```
+
+콘솔창에는 Hello World! 가 잘 출력된다. <br/>
+이 코드를 vue.js에 어울리는 코드로 작성해보고자 한다.
+
+```html
+<h1 ref="hello">Hello World!</h1>
+```
+
+- 요소를 'hello' 라는 이름으로 참조한다.
+
+```javascript
+export default {
+  mounted() {
+    console.log(this.$refs.hello.textContent);
+  },
+};
+```
+
+- `$refs` 라는 객체의 참조하고자 한 이름인 'hello'로 들어가서 textContent 를 출력한다.
+- 주의) 당연한 얘기지만 라이프 사이클에 의해 mounted 된 후에만 사용해야 한다.
+
+<br/>
+
+### - Component 태그에서의 ref
+
+Component 태그에서 ref 속성이 어떻게 동작하는지 확인하기 위해 우선 `Hello.vue` 파일을 작성한다.
+
+```html
+<!-- Hello.vue -->
+<template>
+  <h1>Hello~</h1>
+</template>
+```
+
+그리고 App.vue 를 아래와 같이 수정한다.
+
+```html
+<!-- App.vue -->
+<template>
+  <Hello ref="hello" />
+</template>
+
+<script>
+  import Hello from "~/components/Hello";
+  export default {
+    components: {
+      Hello,
+    },
+    mounted() {
+      console.log(this.$refs.hello);
+    },
+  };
+</script>
+```
+
+![출력된 결과](./markdown/ref.png)
+
+Proxy 객체가 하나 출력된 것을 볼 수 있다.
+
+많은 속성 중 `$el` 이라고 하는 속성은 해당 컴포넌트의 template 태그 내부의 최상위 요소를 나타내며 현재 h1 태그임으로 h1 이 출력되었다.
+
+`this.$refs.hello.$el` 을 출력하면 <br/>
+`<h1>Hello~</h1>` 가 출력되고 <br/>
+`this.$refs.hello.$el.textContent` 는 <br/>
+`Hello~` 가 잘 출력된다.
+
+- 최상위 요소가 여러개인 경우에는 어떤 태그가 최상위 요소인지 알 수가 없으므로 올바르게 출력되지 않는다.
+- 여러 최상위 요소 중에 ref 속성을 추가함으로써 상위 컴포넌트에서 사용할 요소를 지정할 수 있다.
+
+아래와 같이 최상위 코드가 여러개인 경우 지정할 요소에 ref 속성을 추가한다.
+
+```html
+<!-- Hello.vue -->
+<template>
+  <h1>Hello~</h1>
+  <h1 ref="good">Good?</h1>
+</template>
+```
+
+그리고 상위 컴포넌트에서 체이닝을 통해 지정한 하위 컴포넌트의 최상위 요소의 textContent 를 출력할 수 있다.
+
+```html
+<!-- App.vue -->
+<template>
+  <Hello ref="hello" />
+</template>
+
+<script>
+  import Hello from "~/components/Hello";
+  export default {
+    components: {
+      Hello,
+    },
+    mounted() {
+      console.log(this.$refs.hello.$refs.good.textContent);
+    },
+  };
+</script>
+```

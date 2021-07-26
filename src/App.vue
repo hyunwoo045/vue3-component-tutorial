@@ -21,6 +21,7 @@ export default {
 </script>
 -->
 
+<!--
 <template>
   <button @click="message = 'Good?'">
     Click!
@@ -46,6 +47,23 @@ export default {
     return {
       msg: computed(() => this.message)
     }
+  }
+}
+</script>
+-->
+
+<template>
+  <Hello ref="hello" />
+</template>
+
+<script>
+import Hello from '~/components/Hello'
+export default {
+  components: {
+    Hello
+  },
+  mounted() {
+    console.log(this.$refs.hello.$refs.good.textContent)
   }
 }
 </script>
