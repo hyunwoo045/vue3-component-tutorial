@@ -1,7 +1,7 @@
 <template>
-  <MyBtn text='Banana' />
-  <MyBtn color="royalblue" text='Cherry'/>
-  <MyBtn large color='orange' text='Orange'/>
+  <MyBtn class="heropy">
+    Banana
+  </MyBtn>
 </template>
 
 <script>
